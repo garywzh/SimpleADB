@@ -2,6 +2,8 @@
 
 Debug/test your app over WiFi, no USB cable.
 
+[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](https://play.google.com/store/apps/details?id=xyz.garywzh.simpleadb)
+
 ## REQUIREMENTS
 
 This app works on ROOTED devices only. Users need to grant this app su permission when being asked.
