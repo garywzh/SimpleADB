@@ -3,7 +3,9 @@ package xyz.garywzh.simpleadb;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -15,15 +17,20 @@ public class MainActivity extends AppCompatActivity {
             "setprop service.adb.tcp.port 5555",
             "stop adbd",
             "start adbd",
-            "getprop service.adb.tcp.port"};
+            "getprop service.adb.tcp.port",
+            "getprop dhcp.wlan0.ipaddress"};
     private static final String[] DISABLE = {
             "setprop service.adb.tcp.port -1",
             "stop adbd",
             "start adbd",
-            "getprop service.adb.tcp.port"};
-    private static final String[] CHECK = {"getprop service.adb.tcp.port"};
+            "getprop service.adb.tcp.port",
+            "getprop dhcp.wlan0.ipaddress"};
+    private static final String[] CHECK = {
+            "getprop service.adb.tcp.port",
+            "getprop dhcp.wlan0.ipaddress"};
     private static final String WIFI_ADB_PORT = "5555";
 
+    private TextView tipView;
     private SwitchCompat ADBSwitch;
     private CompoundButton.OnCheckedChangeListener mOnCheckedChangeListener;
 
@@ -31,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tipView = (TextView) findViewById(R.id.tip);
         ADBSwitch = (SwitchCompat) findViewById(R.id.ADBSwitch);
         mOnCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -60,11 +68,17 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final boolean result = sudoForResult(strings).trim().equals(WIFI_ADB_PORT);
+                final String result = sudoForResult(strings).trim();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ADBSwitch.setChecked(result);
+                        final boolean isEnabled = result.contains(WIFI_ADB_PORT);
+                        if (isEnabled) {
+                            String[] parts = result.split("\n");
+                            tipView.setText(String.format("%s%s", getString(R.string.tip), parts[1]));
+                        }
+                        tipView.setVisibility(isEnabled ? View.VISIBLE : View.INVISIBLE);
+                        ADBSwitch.setChecked(isEnabled);
                         if (isInit) {
                             ADBSwitch.setOnCheckedChangeListener(mOnCheckedChangeListener);
                         }

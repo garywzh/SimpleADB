@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SimpleADB</string>
+    <string name="tip">"adb connect "</string>
 </resources>
