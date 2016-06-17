@@ -5,10 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.widget.CompoundButton;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
     private static final String[] ENABLE = {
@@ -75,43 +75,44 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    private String sudoForResult(String... strings) {
+    private String sudoForResult(String[] strings) {
         String res = "";
-        DataOutputStream outputStream = null;
-        InputStream response = null;
-        try {
-            Process su = Runtime.getRuntime().exec("su");
-            outputStream = new DataOutputStream(su.getOutputStream());
-            response = su.getInputStream();
 
-            for (String s : strings) {
-                outputStream.writeBytes(s + "\n");
+        try {
+            Process proc = Runtime.getRuntime().exec("su");
+
+            //input commands
+            try (DataOutputStream outputStream = new DataOutputStream(proc.getOutputStream())) {
+                for (String s : strings) {
+                    outputStream.writeBytes(s + "\n");
+                    outputStream.flush();
+                }
+                outputStream.writeBytes("exit\n");
                 outputStream.flush();
+                outputStream.close();
             }
 
-            outputStream.writeBytes("exit\n");
-            outputStream.flush();
+            //wait for execution to finish
             try {
-                su.waitFor();
+                proc.waitFor();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            res = readFully(response);
+
+            //read response
+            int read;
+            char[] buffer = new char[1024];
+            StringBuilder builder = new StringBuilder();
+            try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                while ((read = inputReader.read(buffer)) > 0) {
+                    builder.append(buffer, 0, read);
+                }
+            }
+
+            res = builder.toString();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            Closer.closeSilently(outputStream, response);
         }
         return res;
-    }
-
-    public String readFully(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = is.read(buffer)) != -1) {
-            baos.write(buffer, 0, length);
-        }
-        return baos.toString("UTF-8");
     }
 }
