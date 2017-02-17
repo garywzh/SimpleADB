@@ -6,28 +6,29 @@ import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
+
     private static final String[] ENABLE = {
-            "setprop service.adb.tcp.port 5555",
-            "stop adbd",
-            "start adbd",
-            "getprop service.adb.tcp.port",
-            "getprop dhcp.wlan0.ipaddress"};
+        "setprop service.adb.tcp.port 5555",
+        "stop adbd",
+        "start adbd",
+        "getprop service.adb.tcp.port",
+        "getprop dhcp.wlan0.ipaddress"};
     private static final String[] DISABLE = {
-            "setprop service.adb.tcp.port -1",
-            "stop adbd",
-            "start adbd",
-            "getprop service.adb.tcp.port",
-            "getprop dhcp.wlan0.ipaddress"};
+        "setprop service.adb.tcp.port -1",
+        "stop adbd",
+        "start adbd",
+        "getprop service.adb.tcp.port",
+        "getprop dhcp.wlan0.ipaddress"};
     private static final String[] CHECK = {
-            "getprop service.adb.tcp.port",
-            "getprop dhcp.wlan0.ipaddress"};
+        "getprop service.adb.tcp.port",
+        "getprop dhcp.wlan0.ipaddress"};
     private static final String WIFI_ADB_PORT = "5555";
 
     private TextView tipView;
@@ -72,10 +73,16 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (result.equals("")) {
+                            Toast.makeText(MainActivity.this,
+                                "Permission denied, need ROOT permission!", Toast.LENGTH_SHORT)
+                                .show();
+                        }
                         final boolean isEnabled = result.contains(WIFI_ADB_PORT);
                         if (isEnabled) {
                             String[] parts = result.split("\n");
-                            tipView.setText(String.format("%s%s", getString(R.string.tip), parts[1]));
+                            tipView
+                                .setText(String.format("%s%s", getString(R.string.tip), parts[1]));
                         }
                         tipView.setVisibility(isEnabled ? View.VISIBLE : View.INVISIBLE);
                         ADBSwitch.setChecked(isEnabled);
@@ -117,7 +124,8 @@ public class MainActivity extends AppCompatActivity {
             int read;
             char[] buffer = new char[1024];
             StringBuilder builder = new StringBuilder();
-            try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+            try (BufferedReader inputReader = new BufferedReader(
+                new InputStreamReader(proc.getInputStream()))) {
                 while ((read = inputReader.read(buffer)) > 0) {
                     builder.append(buffer, 0, read);
                 }
