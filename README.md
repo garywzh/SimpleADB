@@ -2,7 +2,7 @@
 
 Debug/test your app over WiFi, no USB cable.
 
-[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](https://play.google.com/store/apps/details?id=xyz.garywzh.simpleadb)
+[![Get it on Google Play](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=xyz.garywzh.simpleadb)
 
 ## REQUIREMENTS
 
